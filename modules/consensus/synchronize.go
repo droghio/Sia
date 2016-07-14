@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net"
 	"time"
+    "fmt"
 
 	"github.com/NebulousLabs/Sia/build"
 	"github.com/NebulousLabs/Sia/crypto"
@@ -242,7 +243,7 @@ func (cs *ConsensusSet) rpcSendBlocks(conn modules.PeerConn) error {
 	var knownBlocks [32]types.BlockID
 	err := encoding.ReadObject(conn, &knownBlocks, 32*crypto.HashSize)
 	if err != nil {
-		return err
+		return fmt.Errorf("SendBlocks 245", err)
 	}
 
 	// Find the most recent block from knownBlocks in the current path.
@@ -276,7 +277,7 @@ func (cs *ConsensusSet) rpcSendBlocks(conn modules.PeerConn) error {
 	})
 	cs.mu.RUnlock()
 	if err != nil {
-		return err
+		return fmt.Errorf("SendBlocks 279", err)
 	}
 
 	// If no matching blocks are found, or if the caller has all known blocks,
@@ -285,7 +286,7 @@ func (cs *ConsensusSet) rpcSendBlocks(conn modules.PeerConn) error {
 		// Send 0 blocks.
 		err = encoding.WriteObject(conn, []types.Block{})
 		if err != nil {
-			return err
+			return fmt.Errorf("SendBlocks 288", err)
 		}
 		// Indicate that no more blocks are available.
 		return encoding.WriteObject(conn, false)
@@ -316,16 +317,16 @@ func (cs *ConsensusSet) rpcSendBlocks(conn modules.PeerConn) error {
 		})
 		cs.mu.RUnlock()
 		if err != nil {
-			return err
+			return fmt.Errorf("SendBlocks 319", err)
 		}
 
 		// Send a set of blocks to the caller + a flag indicating whether more
 		// are available.
 		if err = encoding.WriteObject(conn, blocks); err != nil {
-			return err
+			return fmt.Errorf("SendBlocks 325", err)
 		}
 		if err = encoding.WriteObject(conn, moreAvailable); err != nil {
-			return err
+			return fmt.Errorf("SendBlocks 328", err)
 		}
 	}
 
